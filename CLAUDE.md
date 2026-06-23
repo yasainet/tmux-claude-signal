@@ -21,6 +21,9 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
 - Theme-provided `window-status-style` must survive plugin state.
   - Original value is saved under `__UNSET__` sentinel before overwrite and restored on clear.
+- Running color must be distinguishable from "done acknowledged then idle".
+  - Running color is opt-in via `@claude-signal-running-bg` / `-fg`.
+  - When configured, focus-ack does NOT clear it (only needs-input and done are treated as attention signals that clear on view).
 
 ## Commands
 
@@ -34,5 +37,6 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 ## Glossaries
 
-- needs-input: Claude Code is blocked on a permission prompt waiting for the user.
+- running: Claude Code is processing a prompt or tool call. Color is opt-in and persists across focus.
+- needs-input: Claude Code is blocked on a permission prompt waiting for the user. Color clears on focus.
 - done: Claude Code's Stop hook fired (turn finished). Color persists until window focus to act as unread mark.

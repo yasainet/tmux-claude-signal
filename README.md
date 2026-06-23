@@ -16,17 +16,23 @@ Then merge `hooks/claude-hooks.json` into `~/.claude/settings.json` so Claude Co
 
 Each Claude Code pane reports one of three states.
 
-| state | Claude Code hook | visual |
-|---|---|---|
-| running | UserPromptSubmit | clear |
-| needs-input | PermissionRequest | yellow window-status |
-| done | Stop | red window-status (clears on focus) |
+| state | Claude Code hook | default visual | cleared by |
+|---|---|---|---|
+| running | UserPromptSubmit | clear (opt-in color) | next state |
+| needs-input | PermissionRequest | yellow | focus or next state |
+| done | Stop | red | focus or next state |
 
 Override colors with these options.
 
 ```tmux
+set -g @claude-signal-running-bg 'green'
+set -g @claude-signal-running-fg 'black'
 set -g @claude-signal-needs-input-bg 'yellow'
 set -g @claude-signal-needs-input-fg 'black'
 set -g @claude-signal-done-bg 'red'
 set -g @claude-signal-done-fg 'black'
 ```
+
+The running color is opt-in (no color by default).
+Set both bg and fg to enable it.
+A configured running color persists across window focus so an idle (done-acknowledged) pane is distinguishable from an actively running one.
