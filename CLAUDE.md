@@ -15,8 +15,10 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 ## Constraints
 
-- Claude Code has no hook for "permission granted" or "tool resumed".
-  - UserPromptSubmit is treated as two-stage (off then running) so stale needs-input clears on next prompt.
+- Claude Code has no hook for "permission granted".
+  - PreToolUse (matcher empty = all tools) fires after permission resolution, just before the tool runs.
+  - Mapping PreToolUse to running clears stale needs-input as soon as Claude resumes work.
+  - UserPromptSubmit is also treated as two-stage (off then running) as a belt-and-suspenders fallback.
 - `pane-focus-in` does not fire reliably for panes running Claude Code TUI.
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
 - Theme-provided `window-status-style` must survive plugin state.

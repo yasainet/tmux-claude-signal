@@ -15,6 +15,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${TMUX_CLAUDE_SIGNAL_DIR:-$HOME/.tmux/plugins/tmux-claude-signal}\"/scripts/state.sh --state running"
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "matcher": "",

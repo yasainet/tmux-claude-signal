@@ -8,7 +8,10 @@ TEST_SOCKET="claude-signal-test-$$"
 
 _failures=0
 
-_tmux() { tmux -L "$TEST_SOCKET" "$@"; }
+TEST_CONF="$(mktemp -t claude-signal-test-conf.XXXXXX)"
+printf 'set -g base-index 1\n' > "$TEST_CONF"
+
+_tmux() { tmux -L "$TEST_SOCKET" -f "$TEST_CONF" "$@"; }
 
 setup_tmux() {
   _tmux kill-server 2>/dev/null || true
@@ -18,6 +21,7 @@ setup_tmux() {
 
 teardown_tmux() {
   _tmux kill-server 2>/dev/null || true
+  rm -f "$TEST_CONF"
 }
 
 state_sh() {
