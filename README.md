@@ -35,4 +35,4 @@ set -g @claude-signal-done-fg 'black'
 
 The running color is opt-in (no color by default).
 Set both bg and fg to enable it.
-A configured running color persists across window focus so an idle (done-acknowledged) pane is distinguishable from an actively running one.
+The configured running color persists across window focus.
