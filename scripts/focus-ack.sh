@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Clear pending state colors when the target pane actually gains focus.
+# Restore the original window-status style when the target pane gains focus.
 
 set -euo pipefail
 
@@ -39,19 +39,10 @@ restore_orig() {
   env_unset "$env_key"
 }
 
-state_key="TMUX_CLAUDE_SIGNAL_${pane_id}_STATE"
-pending_key="TMUX_CLAUDE_SIGNAL_${pane_id}_PENDING"
 skey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_STYLE"
 ckey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_CURRENT"
 
-state=$(env_get "$state_key")
-pending=$(env_get "$pending_key")
-
-if [ "$state" = "needs-input" ] || [ "$state" = "done" ] || [ "$pending" = "1" ]; then
-  restore_orig "window-status-style" "$skey"
-  restore_orig "window-status-current-style" "$ckey"
-  env_unset "$state_key"
-  env_unset "$pending_key"
-fi
+restore_orig "window-status-style" "$skey"
+restore_orig "window-status-current-style" "$ckey"
 
 tmux refresh-client -S >/dev/null 2>&1 || true

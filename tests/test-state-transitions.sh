@@ -21,23 +21,17 @@ state_sh "$pane_id" --state needs-input
 assert_eq "bg=yellow,fg=black" "$(get_style "$window_id")" "needs-input bg"
 assert_eq "bg=yellow,fg=black" "$(get_current_style "$window_id")" "needs-input current"
 
-echo "  case: running clears needs-input"
-state_sh "$pane_id" --state running
-assert_empty "$(get_style "$window_id")" "running clears style"
-assert_empty "$(get_current_style "$window_id")" "running clears current"
+echo "  case: off clears needs-input"
+state_sh "$pane_id" --state off
+assert_empty "$(get_style "$window_id")" "off clears style"
+assert_empty "$(get_current_style "$window_id")" "off clears current"
 
 echo "  case: done paints red"
 state_sh "$pane_id" --state done
 assert_eq "bg=red,fg=black" "$(get_style "$window_id")" "done bg"
 
-echo "  case: off clears everything"
+echo "  case: off clears done"
 state_sh "$pane_id" --state off
 assert_empty "$(get_style "$window_id")" "off clears style"
-
-echo "  case: off then running leaves style clear (UserPromptSubmit two-stage)"
-state_sh "$pane_id" --state needs-input
-state_sh "$pane_id" --state off
-state_sh "$pane_id" --state running
-assert_empty "$(get_style "$window_id")" "two-stage clears stale needs-input"
 
 report

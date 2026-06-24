@@ -7,7 +7,7 @@ UNSET_SENTINEL="__UNSET__"
 
 usage() {
   cat <<'EOF' >&2
-Usage: state.sh --state <running|needs-input|done|off> [--pane <pane_id>]
+Usage: state.sh --state <needs-input|done|off> [--pane <pane_id>]
 EOF
 }
 
@@ -26,7 +26,7 @@ while [ $# -gt 0 ]; do
 done
 
 case "$state" in
-  running|needs-input|done|off) ;;
+  needs-input|done|off) ;;
   *) usage; exit 1 ;;
 esac
 
@@ -92,42 +92,20 @@ clear_style() {
 }
 
 window_id=$(tmux display-message -p -t "$pane" '#{window_id}')
-active_window=$(tmux display-message -p '#{window_id}')
 
-state_key="TMUX_CLAUDE_SIGNAL_${pane}_STATE"
-pending_key="TMUX_CLAUDE_SIGNAL_${pane}_PENDING"
-
-running_bg=$(opt_or_default "@claude-signal-running-bg" "")
-running_fg=$(opt_or_default "@claude-signal-running-fg" "")
 needs_bg=$(opt_or_default "@claude-signal-needs-input-bg" "yellow")
 needs_fg=$(opt_or_default "@claude-signal-needs-input-fg" "black")
 done_bg=$(opt_or_default "@claude-signal-done-bg" "red")
 done_fg=$(opt_or_default "@claude-signal-done-fg" "black")
 
 case "$state" in
-  running)
-    env_unset "$pending_key"
-    if [ -n "$running_bg" ] && [ -n "$running_fg" ]; then
-      env_set "$state_key" "running"
-      apply_style "$window_id" "$running_bg" "$running_fg"
-    else
-      env_unset "$state_key"
-      clear_style "$window_id"
-    fi
-    ;;
   needs-input)
-    env_set "$state_key" "needs-input"
-    env_unset "$pending_key"
     apply_style "$window_id" "$needs_bg" "$needs_fg"
     ;;
   done)
-    env_set "$state_key" "done"
-    env_set "$pending_key" "1"
     apply_style "$window_id" "$done_bg" "$done_fg"
     ;;
   off)
-    env_unset "$state_key"
-    env_unset "$pending_key"
     clear_style "$window_id"
     ;;
 esac

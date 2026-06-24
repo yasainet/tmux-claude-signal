@@ -7,10 +7,6 @@
           {
             "type": "command",
             "command": "\"${TMUX_CLAUDE_SIGNAL_DIR:-$HOME/.tmux/plugins/tmux-claude-signal}\"/scripts/state.sh --state off"
-          },
-          {
-            "type": "command",
-            "command": "\"${TMUX_CLAUDE_SIGNAL_DIR:-$HOME/.tmux/plugins/tmux-claude-signal}\"/scripts/state.sh --state running"
           }
         ]
       }
@@ -21,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${TMUX_CLAUDE_SIGNAL_DIR:-$HOME/.tmux/plugins/tmux-claude-signal}\"/scripts/state.sh --state running"
+            "command": "\"${TMUX_CLAUDE_SIGNAL_DIR:-$HOME/.tmux/plugins/tmux-claude-signal}\"/scripts/state.sh --state off"
           }
         ]
       }

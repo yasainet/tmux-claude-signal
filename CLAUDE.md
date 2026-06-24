@@ -17,20 +17,20 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 - Claude Code has no hook for "permission granted".
   - PreToolUse (matcher empty = all tools) fires after permission resolution, just before the tool runs.
-  - Mapping PreToolUse to running clears stale needs-input as soon as Claude resumes work.
-  - UserPromptSubmit is also treated as two-stage (off then running) as a belt-and-suspenders fallback.
+  - Mapping PreToolUse to off clears stale needs-input as soon as Claude resumes work.
+  - UserPromptSubmit also maps to off so a new prompt clears any stale signal.
 - `pane-focus-in` does not fire reliably for panes running Claude Code TUI.
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
 - Theme-provided `window-status-style` must survive plugin state.
   - Original value is saved under `__UNSET__` sentinel before overwrite and restored on clear.
-- Running color must be distinguishable from "done acknowledged then idle".
-  - Running color is opt-in via `@claude-signal-running-bg` / `-fg`.
-  - When configured, focus-ack does NOT clear it (only needs-input and done are treated as attention signals that clear on view).
+- Only attention signals are colored (needs-input, done); both clear on focus.
+  - A "running" color was dropped after use showed it added noise without value.
+  - focus-ack just restores the saved original, so it needs no per-state tracking.
 
 ## Commands
 
 - `bash tests/run-all.sh` runs the full test suite in detached tmux servers.
-- `bash scripts/state.sh --state <running|needs-input|done|off>` drives a state transition manually.
+- `bash scripts/state.sh --state <needs-input|done|off>` drives a state transition manually.
 
 ## Verification
 
@@ -39,6 +39,6 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 ## Glossaries
 
-- running: Claude Code is processing a prompt or tool call. Color is opt-in and persists across focus.
 - needs-input: Claude Code is blocked on a permission prompt waiting for the user. Color clears on focus.
 - done: Claude Code's Stop hook fired (turn finished). Color persists until window focus to act as unread mark.
+- off: clear any signal and restore the original window-status style. Used on resume (UserPromptSubmit / PreToolUse).

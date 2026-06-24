@@ -22,9 +22,9 @@ echo "  case: needs-input overrides theme"
 state_sh "$pane_id" --state needs-input
 assert_eq "bg=yellow,fg=black" "$(get_style "$window_id")" "needs-input override"
 
-echo "  case: running restores theme style"
-state_sh "$pane_id" --state running
-assert_eq "$theme_style" "$(get_style "$window_id")" "theme restored after running"
+echo "  case: off restores theme style"
+state_sh "$pane_id" --state off
+assert_eq "$theme_style" "$(get_style "$window_id")" "theme restored after off"
 
 echo "  case: done overrides, focus restores theme"
 state_sh "$pane_id" --state done
