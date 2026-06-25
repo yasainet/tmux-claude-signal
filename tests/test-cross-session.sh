@@ -21,8 +21,8 @@ other_window=$(_tmux display-message -p -t other:1 '#{window_id}')
 echo "  case: no markers anywhere -> empty"
 assert_empty "$(cross_session_sh test)" "all clean"
 
-icon=$''
-chip="#[fg=#15161e,bg=#9ece6a] ${icon}  "
+icon=$'\u29c9'
+chip="#[fg=#15161e,bg=#9ece6a] ${icon} "
 
 echo "  case: needs-input in other session -> chip emitted"
 _tmux set-window-option -qt "$other_window" "@claude-signal-state" "needs-input"
