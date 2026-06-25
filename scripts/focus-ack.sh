@@ -39,6 +39,12 @@ restore_orig() {
   env_unset "$env_key"
 }
 
+state_key="TMUX_CLAUDE_SIGNAL_${window_id}_STATE"
+state=$(env_get "$state_key")
+if [ "$state" = "running" ]; then
+  exit 0
+fi
+
 skey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_STYLE"
 ckey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_CURRENT"
 
