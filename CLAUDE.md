@@ -17,7 +17,7 @@ Window-status color signal for Claude Code panes inside the current tmux session
 ## Constraints
 
 - 状態は needs-input / done / off の 3 つのみ。
-  - running は集中阻害になるため廃止 (`docs/DECISIONS.md` の 2026-06-26 running 廃止)。
+  - running は集中阻害になるため廃止。
   - PreToolUse は running ではなく off にマッピングし、resume 時の stale 消しに利用する。
 - Claude Code has no hook for "permission granted".
   - PreToolUse (matcher empty = all tools) fires after permission resolution, just before the tool runs.
@@ -27,7 +27,7 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
 - Theme は global level (`set -g window-status-style ...`) で設定する前提。
   - 上書きは window option レベルのみ。off / focus で window option を unset すれば global default に戻る。
-  - window option レベルの theme はサポート外 (env-less restore 採用、`docs/DECISIONS.md` の 2026-06-25 env-less)。
+  - window option レベルの theme はサポート外 (env-less restore 採用)。
 - env は持たない。`cleanup.sh` は過去スキーマ (`%`, `@N_STATE`, `@N_ORIG_*`) の残骸を一掃する保険。
 - debug log は `@claude-signal-debug 1` で opt-in、デフォルト無音。
   出力先は `${TMUX_CLAUDE_SIGNAL_LOG:-/tmp/claude-signal.log}`。
