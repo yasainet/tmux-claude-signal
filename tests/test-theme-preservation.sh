@@ -33,4 +33,12 @@ _tmux select-window -t "$window_id"
 focus_ack_sh "$pane_id" "$window_id"
 assert_eq "$theme_style" "$(get_style "$window_id")" "theme restored after focus"
 
+echo "  case: theme format restored after running → off"
+_tmux set-option -g "@claude-signal-running-frames" "A B"
+theme_format="#I:#W"
+_tmux set-window-option -t "$window_id" window-status-format "$theme_format"
+state_sh "$pane_id" --state running
+state_sh "$pane_id" --state off
+assert_eq "$theme_format" "$(_tmux show-options -wqv -t "$window_id" window-status-format)" "theme format restored"
+
 report
