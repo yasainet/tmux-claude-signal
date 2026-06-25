@@ -21,6 +21,10 @@ Each Claude Code pane raises one of two attention signals.
 | needs-input | PermissionRequest | 💛 yellow      | focus or next state |
 | done        | Stop              | ❤️ red         | focus or next state |
 
+### Sample
+
+![window-status example](docs/images/window-status.png)
+
 Both signals clear as soon as you focus the window.
 Resuming work (UserPromptSubmit / PreToolUse) also clears any stale signal.
 
