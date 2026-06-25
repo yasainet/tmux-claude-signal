@@ -17,7 +17,7 @@ while IFS='|' read -r sess marker; do
   case "$marker" in
     needs-input|done)
       icon=$''
-      printf '#[fg=#15161e,bg=#9ece6a] %s #[fg=#9ece6a,bg=#16161e] ' "$icon"
+      printf '#[fg=#15161e,bg=#9ece6a] %s ' "$icon"
       exit 0
       ;;
   esac
