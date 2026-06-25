@@ -16,10 +16,10 @@ Then merge `hooks/claude-hooks.json` into `~/.claude/settings.json` so Claude Co
 
 Each Claude Code pane raises one of two attention signals.
 
-| state | Claude Code hook | default visual | cleared by |
-|---|---|---|---|
-| needs-input | PermissionRequest | yellow | focus or next state |
-| done | Stop | red | focus or next state |
+| state       | Claude Code hook  | default visual | cleared by          |
+| ----------- | ----------------- | -------------- | ------------------- |
+| needs-input | PermissionRequest | 💛 yellow      | focus or next state |
+| done        | Stop              | ❤️ red         | focus or next state |
 
 Both signals clear as soon as you focus the window.
 Resuming work (UserPromptSubmit / PreToolUse) also clears any stale signal.
