@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Aggregate @claude-signal-state across non-current sessions.
-# Output: a tmux fg-control sequence when any other session is non-idle, else empty.
-# Caller follows this with the icon glyph and a fg restore.
+# Output: a complete session-info chip (green bg, icon glyph U+EBC8) when any
+# other session is non-idle, else empty. Chip ends with a separator transition
+# back to the status bar background and a trailing space.
 
 set -euo pipefail
 
@@ -15,7 +16,8 @@ while IFS='|' read -r sess marker; do
   [ "$sess" = "$current" ] && continue
   case "$marker" in
     needs-input|done)
-      printf '#[fg=green]'
+      icon=$''
+      printf '#[fg=#15161e,bg=#9ece6a] %s #[fg=#9ece6a,bg=#16161e] ' "$icon"
       exit 0
       ;;
   esac

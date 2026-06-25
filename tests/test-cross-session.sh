@@ -21,23 +21,26 @@ other_window=$(_tmux display-message -p -t other:1 '#{window_id}')
 echo "  case: no markers anywhere -> empty"
 assert_empty "$(cross_session_sh test)" "all clean"
 
-echo "  case: needs-input in other session -> green fg sequence"
+icon=$''
+chip="#[fg=#15161e,bg=#9ece6a] ${icon} #[fg=#9ece6a,bg=#16161e] "
+
+echo "  case: needs-input in other session -> chip emitted"
 _tmux set-window-option -qt "$other_window" "@claude-signal-state" "needs-input"
 out=$(cross_session_sh test)
-assert_eq "#[fg=green]" "$out" "needs-input -> green"
+assert_eq "$chip" "$out" "needs-input -> chip"
 
-echo "  case: done in other session -> green fg sequence"
+echo "  case: done in other session -> chip emitted"
 _tmux set-window-option -qut "$other_window" "@claude-signal-state"
 _tmux set-window-option -qt "$other_window" "@claude-signal-state" "done"
 out=$(cross_session_sh test)
-assert_eq "#[fg=green]" "$out" "done -> green"
+assert_eq "$chip" "$out" "done -> chip"
 
-echo "  case: both states across sessions -> single green fg sequence"
+echo "  case: both states across sessions -> single chip"
 _tmux new-window -t other
 other_window2=$(_tmux display-message -p -t other:2 '#{window_id}')
 _tmux set-window-option -qt "$other_window2" "@claude-signal-state" "needs-input"
 out=$(cross_session_sh test)
-assert_eq "#[fg=green]" "$out" "any non-idle -> single green"
+assert_eq "$chip" "$out" "any non-idle -> single chip"
 
 echo "  case: marker on current session is ignored"
 _tmux set-window-option -qut "$other_window" "@claude-signal-state"
