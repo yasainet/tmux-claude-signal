@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Aggregate @claude-signal-state across non-current sessions.
-# Output: a complete session-info chip (green bg, icon glyph U+EBC8) when any
+# Output: a complete session-info chip (green bg, icon '*') when any
 # other session is non-idle, else empty. Chip ends with a separator transition
 # back to the status bar background and a trailing space.
 
@@ -16,7 +16,7 @@ while IFS='|' read -r sess marker; do
   [ "$sess" = "$current" ] && continue
   case "$marker" in
     needs-input|done)
-      icon=$'\u29c9'
+      icon='*'
       printf '#[fg=#15161e,bg=#9ece6a] %s ' "$icon"
       exit 0
       ;;
