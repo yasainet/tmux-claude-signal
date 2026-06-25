@@ -25,7 +25,7 @@ while IFS= read -r line; do
     TMUX_CLAUDE_SIGNAL_%*)
       tmux set-environment -gu "$key" 2>/dev/null || true
       ;;
-    TMUX_CLAUDE_SIGNAL_@[0-9]*_ORIG_STYLE|TMUX_CLAUDE_SIGNAL_@[0-9]*_ORIG_CURRENT)
+    TMUX_CLAUDE_SIGNAL_@[0-9]*_ORIG_STYLE|TMUX_CLAUDE_SIGNAL_@[0-9]*_ORIG_CURRENT|TMUX_CLAUDE_SIGNAL_@[0-9]*_ORIG_FORMAT|TMUX_CLAUDE_SIGNAL_@[0-9]*_STATE)
       wid=$(printf '%s' "$key" | sed -E 's/^TMUX_CLAUDE_SIGNAL_(@[0-9]+)_.*/\1/')
       [ -z "$wid" ] && continue
       if ! printf '%s\n' "$existing" | grep -qx "$wid"; then
