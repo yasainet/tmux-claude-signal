@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# cross-session.sh aggregates @claude-signal-state across non-current sessions.
+# cross-session.sh always emits a chip; color reflects whether any other
+# session is non-idle.
 
 set -euo pipefail
 source "$(dirname "$0")/lib/test-lib.sh"
@@ -18,35 +19,36 @@ trap teardown_tmux EXIT
 _tmux new-session -d -s other -x 80 -y 24
 other_window=$(_tmux display-message -p -t other:1 '#{window_id}')
 
-echo "  case: no markers anywhere -> empty"
-assert_empty "$(cross_session_sh test)" "all clean"
+icon=$'⊞'
+active="#[fg=#15161e,bg=#9ece6a] ${icon} "
+idle="#[fg=#7aa2f7,bg=#3b4261] ${icon} "
 
-icon=$'\u229e'
-chip="#[fg=#15161e,bg=#9ece6a] ${icon} "
+echo "  case: no markers anywhere -> idle chip"
+assert_eq "$idle" "$(cross_session_sh test)" "all clean -> idle"
 
-echo "  case: needs-input in other session -> chip emitted"
+echo "  case: needs-input in other session -> active chip"
 _tmux set-window-option -qt "$other_window" "@claude-signal-state" "needs-input"
 out=$(cross_session_sh test)
-assert_eq "$chip" "$out" "needs-input -> chip"
+assert_eq "$active" "$out" "needs-input -> active"
 
-echo "  case: done in other session -> chip emitted"
+echo "  case: done in other session -> active chip"
 _tmux set-window-option -qut "$other_window" "@claude-signal-state"
 _tmux set-window-option -qt "$other_window" "@claude-signal-state" "done"
 out=$(cross_session_sh test)
-assert_eq "$chip" "$out" "done -> chip"
+assert_eq "$active" "$out" "done -> active"
 
-echo "  case: both states across sessions -> single chip"
+echo "  case: both states across sessions -> active chip"
 _tmux new-window -t other
 other_window2=$(_tmux display-message -p -t other:2 '#{window_id}')
 _tmux set-window-option -qt "$other_window2" "@claude-signal-state" "needs-input"
 out=$(cross_session_sh test)
-assert_eq "$chip" "$out" "any non-idle -> single chip"
+assert_eq "$active" "$out" "any non-idle -> active"
 
-echo "  case: marker on current session is ignored"
+echo "  case: marker on current session only -> idle chip"
 _tmux set-window-option -qut "$other_window" "@claude-signal-state"
 _tmux set-window-option -qut "$other_window2" "@claude-signal-state"
 test_window=$(_tmux display-message -p -t test:1 '#{window_id}')
 _tmux set-window-option -qt "$test_window" "@claude-signal-state" "needs-input"
-assert_empty "$(cross_session_sh test)" "current session excluded"
+assert_eq "$idle" "$(cross_session_sh test)" "current session excluded -> idle"
 
 report
