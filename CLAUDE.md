@@ -23,19 +23,17 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
 - Theme-provided `window-status-style` must survive plugin state.
   - Original value is saved under `__UNSET__` sentinel before overwrite and restored on clear.
-- needs-input / done は bg 軸 (window-status-style) で表現し focus でクリアする。
+- needs-input / done は bg 軸 (window-status-style) で表現し focus でクリア。
   - running は format 軸 (window-status-format) で別管理し focus 永続。
-  - focus-ack は STATE=running なら restore を skip する。
+  - focus-ack は STATE=running なら restore を skip。
+  - spinner.sh は tmux `#()` から 1 秒粒度で呼ぶ stateless スクリプト。
+  - frames は `@claude-signal-running-frames` にスペース区切りで設定。
 - env は plugin source 時に cleanup される (`scripts/cleanup.sh`)。
-- running は format 軸 (window-status-format) で表現し bg は触らない。
-  needs-input/done との完全排他、focus 永続を維持する。
-- spinner.sh は tmux `#()` から 1 秒粒度で呼ばれる stateless スクリプト。
-  frames は `@claude-signal-running-frames` にスペース区切りで設定する。
 
 ## Commands
 
 - `bash tests/run-all.sh` runs the full test suite in detached tmux servers.
-- `bash scripts/state.sh --state <needs-input|done|off>` drives a state transition manually.
+- `bash scripts/state.sh --state <running|needs-input|done|off>` drives state transition manually.
 
 ## Verification
 
