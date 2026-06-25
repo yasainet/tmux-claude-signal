@@ -24,6 +24,7 @@ echo "  case: switching to the window clears red"
 _tmux select-window -t "$window_id"
 focus_ack_sh "$pane_id" "$window_id"
 assert_empty "$(get_style "$window_id")" "focus clears done"
+assert_empty "$(get_state_marker "$window_id")" "focus clears done marker"
 
 echo "  case: needs-input clears on focus too"
 _tmux select-window -t test:1
@@ -32,5 +33,6 @@ assert_eq "bg=yellow,fg=black" "$(get_style "$window_id")" "needs-input set"
 _tmux select-window -t "$window_id"
 focus_ack_sh "$pane_id" "$window_id"
 assert_empty "$(get_style "$window_id")" "focus clears needs-input"
+assert_empty "$(get_state_marker "$window_id")" "focus clears needs-input marker"
 
 report

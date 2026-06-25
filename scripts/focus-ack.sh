@@ -30,5 +30,6 @@ sig_log "focus-ack.sh ACTIVE pane_active=$pane_active window_active=$window_acti
 sig_log "focus-ack CLEAR window=$window_id"
 tmux set-window-option -qut "$window_id" "window-status-style" || true
 tmux set-window-option -qut "$window_id" "window-status-current-style" || true
+tmux set-window-option -qut "$window_id" "@claude-signal-state" || true
 
 tmux refresh-client -S >/dev/null 2>&1 || true
