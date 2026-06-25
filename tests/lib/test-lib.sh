@@ -66,6 +66,28 @@ assert_empty() {
   return 0
 }
 
+cleanup_sh() {
+  _tmux run-shell "bash '$TEST_ROOT/scripts/cleanup.sh'"
+}
+
+env_show() {
+  local name="$1"
+  _tmux show-environment -g "$name" 2>/dev/null | sed 's/^[^=]*=//' || true
+}
+
+assert_env_absent() {
+  local name="$1" msg="${2:-}"
+  local out
+  out=$(_tmux show-environment -g "$name" 2>&1) || true
+  case "$out" in
+    "unknown variable: "*) return 0 ;;
+  esac
+  printf '  FAIL [%s]\n    expected env %s absent\n    actual:   %s\n' \
+    "$msg" "$name" "$out" >&2
+  _failures=$((_failures + 1))
+  return 1
+}
+
 report() {
   if [ "$_failures" -gt 0 ]; then
     printf 'FAILED (%d assertion(s))\n' "$_failures" >&2
