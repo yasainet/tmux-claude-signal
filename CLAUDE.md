@@ -23,9 +23,9 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
 - Theme-provided `window-status-style` must survive plugin state.
   - Original value is saved under `__UNSET__` sentinel before overwrite and restored on clear.
-- Only attention signals are colored (needs-input, done); both clear on focus.
-  - A "running" color was dropped after use showed it added noise without value.
-  - focus-ack just restores the saved original, so it needs no per-state tracking.
+- needs-input / done は bg 軸 (window-status-style) で表現し focus でクリアする。
+  - running は format 軸 (window-status-format) で別管理し focus 永続。
+  - focus-ack は STATE=running なら restore を skip する。
 - env は plugin source 時に cleanup される (`scripts/cleanup.sh`)。
 - running は format 軸 (window-status-format) で表現し bg は触らない。
   needs-input/done との完全排他、focus 永続を維持する。
