@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Aggregate @claude-signal-state across non-current sessions.
-# Output: tmux format string for status-right prepend, or empty.
+# Output: tmux format string (fg-only dots, bg inherited from caller's chip).
+# Caller must restore fg after the call (script does not reset to a known color).
 
 set -euo pipefail
 
@@ -22,7 +23,6 @@ while IFS='|' read -r sess marker; do
 done < <(tmux list-windows -a -F '#{session_name}|#{@claude-signal-state}' 2>/dev/null)
 
 out=""
-[ "$has_needs" -eq 1 ] && out+=" #[fg=yellow]●#[default]"
-[ "$has_done" -eq 1 ]  && out+=" #[fg=red]●#[default]"
-[ -n "$out" ] && out+=" "
+[ "$has_needs" -eq 1 ] && out+="#[fg=yellow]● "
+[ "$has_done" -eq 1 ]  && out+="#[fg=red]● "
 printf '%s' "$out"
