@@ -26,6 +26,7 @@ Window-status color signal for Claude Code panes inside the current tmux session
 - Only attention signals are colored (needs-input, done); both clear on focus.
   - A "running" color was dropped after use showed it added noise without value.
   - focus-ack just restores the saved original, so it needs no per-state tracking.
+- env は plugin source 時に cleanup される (`scripts/cleanup.sh`)。
 
 ## Commands
 
