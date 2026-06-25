@@ -71,8 +71,12 @@ cleanup_sh() {
 }
 
 env_show() {
-  local name="$1"
-  _tmux show-environment -g "$name" 2>/dev/null | sed 's/^[^=]*=//' || true
+  local name="$1" out
+  out=$(_tmux show-environment -g "$name" 2>&1) || { echo ""; return; }
+  case "$out" in
+    "unknown variable: "*) echo ""; return ;;
+  esac
+  printf '%s' "${out#*=}"
 }
 
 assert_env_absent() {

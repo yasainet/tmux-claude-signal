@@ -11,6 +11,7 @@ set -g @plugin 'yasainet/tmux-claude-signal'
 ```
 
 Then merge `hooks/claude-hooks.json` into `~/.claude/settings.json` so Claude Code reports state transitions.
+
 Plugin source 時に過去スキーマと不在 window 由来の env を自動掃除します。
 
 ## Usage

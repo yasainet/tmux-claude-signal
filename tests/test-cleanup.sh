@@ -5,7 +5,7 @@ set -euo pipefail
 source "$(dirname "$0")/lib/test-lib.sh"
 
 setup_tmux
-trap teardown_tmux EXIT
+trap 'teardown_tmux; rm -rf "${FAKE_DIR:-}"' EXIT
 
 live_window=$(_tmux display-message -p '#{window_id}')
 
@@ -27,5 +27,31 @@ assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_ORIG_CURRENT' "gone window CURRENT re
 assert_eq "__UNSET__" "$(env_show "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_STYLE")" "live window kept"
 assert_eq "/test/path" "$(env_show TMUX_CLAUDE_SIGNAL_DIR)" "DIR kept"
 assert_eq "bar"        "$(env_show TMUX_CLAUDE_SIGNAL_FUTURE_FOO)" "unknown kept"
+
+echo "  case: list-windows empty makes cleanup a no-op"
+# Re-seed one of the stale keys so we have something to detect non-removal.
+_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_%11_STATE' done
+
+# Build a fake tmux on PATH that returns empty for `list-windows -a` and
+# delegates everything else to the real tmux.
+FAKE_DIR="$(mktemp -d -t claude-signal-fake-XXXXXX)"
+REAL_TMUX="$(command -v tmux)"
+cat > "$FAKE_DIR/tmux" <<EOF
+#!/usr/bin/env bash
+if [ "\$1" = "list-windows" ]; then
+  exit 0
+fi
+exec "$REAL_TMUX" -L "$TEST_SOCKET" -f "$TEST_CONF" "\$@"
+EOF
+chmod +x "$FAKE_DIR/tmux"
+
+PATH="$FAKE_DIR:$PATH" bash "$TEST_ROOT/scripts/cleanup.sh"
+
+# Stale key should still be present because cleanup must have bailed out.
+out=$(_tmux show-environment -g 'TMUX_CLAUDE_SIGNAL_%11_STATE' 2>&1)
+case "$out" in
+  "TMUX_CLAUDE_SIGNAL_%11_STATE=done") ;;
+  *) printf '  FAIL [safety: stale key removed despite empty list-windows]\n    actual: %s\n' "$out" >&2; _failures=$((_failures + 1)) ;;
+esac
 
 report
