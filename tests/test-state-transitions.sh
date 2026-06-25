@@ -34,28 +34,17 @@ echo "  case: off clears done"
 state_sh "$pane_id" --state off
 assert_empty "$(get_style "$window_id")" "off clears style"
 
-echo "  case: running paints default green and sets STATE"
-state_sh "$pane_id" --state running
-assert_eq "bg=#9ece6a,fg=#15161e" "$(get_style "$window_id")" "running bg default"
-assert_eq "bg=#9ece6a,fg=#15161e" "$(get_current_style "$window_id")" "running current default"
-assert_eq "running" "$(env_show "TMUX_CLAUDE_SIGNAL_${window_id}_STATE")" "STATE=running"
-
-echo "  case: needs-input after running repaints yellow and unsets STATE"
+echo "  case: colors are overridable"
+_tmux set-option -g "@claude-signal-needs-input-bg" "cyan"
+_tmux set-option -g "@claude-signal-needs-input-fg" "white"
 state_sh "$pane_id" --state needs-input
-assert_eq "bg=yellow,fg=black" "$(get_style "$window_id")" "yellow after running"
-assert_env_absent "TMUX_CLAUDE_SIGNAL_${window_id}_STATE" "STATE unset after needs-input"
-
-echo "  case: off after running clears bg and unsets STATE"
-state_sh "$pane_id" --state running
+assert_eq "bg=cyan,fg=white" "$(get_style "$window_id")" "needs-input override"
 state_sh "$pane_id" --state off
-assert_empty "$(get_style "$window_id")" "off clears running bg"
-assert_env_absent "TMUX_CLAUDE_SIGNAL_${window_id}_STATE" "STATE unset after off"
 
-echo "  case: running color is overridable"
-_tmux set-option -g "@claude-signal-running-bg" "cyan"
-_tmux set-option -g "@claude-signal-running-fg" "white"
-state_sh "$pane_id" --state running
-assert_eq "bg=cyan,fg=white" "$(get_style "$window_id")" "running bg override"
-state_sh "$pane_id" --state off
+echo "  case: running is rejected (removed state)"
+if bash "$TEST_ROOT/scripts/state.sh" --pane "$pane_id" --state running 2>/dev/null; then
+  printf '  FAIL [running rejected]\n    state.sh accepted removed state\n' >&2
+  _failures=$((_failures + 1))
+fi
 
 report

@@ -3,6 +3,14 @@
 不可逆な技術選定と包括判断のみを 1 行で残す。
 詳細は spec / commit / コードを参照する。
 
+## 2026-06-26 running 廃止
+
+- running 状態の表示そのものを廃止する。signal は needs-input / done / off の 3 状態のみ。
+- 理由: 「Claude が動いている」可視化は色が常時点灯することで意識を散漫にし、本来の unread mark として効くべき needs-input / done のシグナル強度を相対的に下げていた。
+- PreToolUse hook は running 発火をやめ、`--state off` にマッピングし直す (resume 時に stale needs-input / done を消す本来の役割に戻す)。
+- `STATE` env と focus-ack の skip ロジックは不要になり削除。`cleanup.sh` は過去 plugin の残骸 (`@N_STATE`, `@N_ORIG_*`, `%`) を一掃する保険として残す。
+- 副次効果: PreToolUse → focus-ack の race で done が再表示される既知バグも、STATE env と running 軸の撤廃で同時に解消される (`memory/unread-revival-investigation` 終了)。
+
 ## 2026-06-25 running spinner
 
 - running は window-status-format 軸のスピナーで表現する。

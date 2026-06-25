@@ -27,17 +27,6 @@ sig_log "focus-ack.sh ACTIVE pane_active=$pane_active window_active=$window_acti
 [ "$pane_active" = "1" ] || { sig_log "focus-ack.sh ABORT pane not active"; exit 0; }
 [ "$window_active" = "1" ] || { sig_log "focus-ack.sh ABORT window not active"; exit 0; }
 
-env_get() {
-  tmux show-environment -g "$1" 2>/dev/null | sed 's/^[^=]*=//' || true
-}
-
-state_key="TMUX_CLAUDE_SIGNAL_${window_id}_STATE"
-state=$(env_get "$state_key")
-if [ "$state" = "running" ]; then
-  sig_log "focus-ack.sh SKIP running state persists for window=$window_id"
-  exit 0
-fi
-
 sig_log "focus-ack CLEAR window=$window_id"
 tmux set-window-option -qut "$window_id" "window-status-style" || true
 tmux set-window-option -qut "$window_id" "window-status-current-style" || true

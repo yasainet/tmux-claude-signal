@@ -43,12 +43,4 @@ focus_ack_sh "$pane_id" "$window_id"
 assert_empty "$(get_style "$window_id")" "focus clears window-level override"
 assert_evaluated_style "$theme_style" "theme restored after focus"
 
-echo "  case: theme restored after running → off"
-_tmux select-window -t test:1
-state_sh "$pane_id" --state running
-assert_eq "bg=#9ece6a,fg=#15161e" "$(get_style "$window_id")" "running override"
-state_sh "$pane_id" --state off
-assert_empty "$(get_style "$window_id")" "off clears window-level override"
-assert_evaluated_style "$theme_style" "theme restored after off"
-
 report
