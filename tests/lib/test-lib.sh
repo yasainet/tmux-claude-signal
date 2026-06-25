@@ -70,6 +70,11 @@ cleanup_sh() {
   _tmux run-shell "bash '$TEST_ROOT/scripts/cleanup.sh'"
 }
 
+spinner_sh() {
+  _tmux run-shell "bash '$TEST_ROOT/scripts/spinner.sh' > /tmp/claude-signal-spinner.out 2>&1"
+  cat /tmp/claude-signal-spinner.out 2>/dev/null || true
+}
+
 env_show() {
   local name="$1" out
   out=$(_tmux show-environment -g "$name" 2>&1) || { echo ""; return; }
