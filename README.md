@@ -30,6 +30,19 @@ Each Claude Code pane reports state via window-status.
 Color persists until the window gains focus, acting as an unread mark.
 Resuming work (UserPromptSubmit / PreToolUse) also clears stale signals.
 
+### Cross-session indicator
+
+Aggregate other sessions' state into the attached client's `status-right`.
+Add the line below to your `tmux.conf` after the theme source.
+
+```tmux
+set -ag status-right "#(#{TMUX_CLAUDE_SIGNAL_DIR}/scripts/cross-session.sh #{client_session})"
+```
+
+A yellow `●` appears when any window in another session is `needs-input`.
+A red `●` appears for `done`.
+Both dots disappear when the corresponding state is cleared (focus or off).
+
 Override colors with these options.
 
 ```tmux

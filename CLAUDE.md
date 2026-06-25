@@ -6,7 +6,8 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 - Claude Code hooks (UserPromptSubmit / PreToolUse / PermissionRequest / Stop) drive per-window color state.
 - Color clears as soon as the user focuses the window so the signal acts as an unread mark.
-- Scope is intentionally narrow (single session, single agent, window-status only).
+- 着色対象は同 session 内 window のみで scope を絞る。
+- state marker (`@claude-signal-state` window option) を公開し、`scripts/cross-session.sh` が全 session を集約して status-right に表示する。
 
 ## Environments
 
@@ -47,3 +48,4 @@ Window-status color signal for Claude Code panes inside the current tmux session
 - needs-input: Claude Code is blocked on a permission prompt waiting for the user. Color clears on focus.
 - done: Claude Code's Stop hook fired (turn finished). Color persists until window focus to act as unread mark.
 - off: clear any signal and restore the original window-status style. Used on resume (UserPromptSubmit / PreToolUse).
+- `@claude-signal-state`: window option として公開される state marker。値は `needs-input` / `done` / (unset)。`state.sh` の apply/clear と `focus-ack.sh` で同期され、`scripts/cross-session.sh` が全 window を集約して読む。
