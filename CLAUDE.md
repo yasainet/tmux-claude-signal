@@ -27,6 +27,10 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - A "running" color was dropped after use showed it added noise without value.
   - focus-ack just restores the saved original, so it needs no per-state tracking.
 - env は plugin source 時に cleanup される (`scripts/cleanup.sh`)。
+- running は format 軸 (window-status-format) で表現し bg は触らない。
+  needs-input/done との完全排他、focus 永続を維持する。
+- spinner.sh は tmux `#()` から 1 秒粒度で呼ばれる stateless スクリプト。
+  frames は `@claude-signal-running-frames` にスペース区切りで設定する。
 
 ## Commands
 
@@ -40,6 +44,8 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 ## Glossaries
 
+- running: Claude Code が tool を実行中 (PreToolUse 発火後)。
+  `@claude-signal-running-frames` 設定時のみスピナーを表示。focus 永続。
 - needs-input: Claude Code is blocked on a permission prompt waiting for the user. Color clears on focus.
 - done: Claude Code's Stop hook fired (turn finished). Color persists until window focus to act as unread mark.
 - off: clear any signal and restore the original window-status style. Used on resume (UserPromptSubmit / PreToolUse).

@@ -20,6 +20,7 @@ Each Claude Code pane raises one of two attention signals.
 
 | state       | Claude Code hook  | default visual | cleared by          |
 | ----------- | ----------------- | -------------- | ------------------- |
+| running     | PreToolUse        | スピナー (opt-in) | 次の状態          |
 | needs-input | PermissionRequest | 💛 yellow      | focus or next state |
 | done        | Stop              | ❤️ red         | focus or next state |
 
@@ -37,4 +38,10 @@ set -g @claude-signal-needs-input-bg 'yellow'
 set -g @claude-signal-needs-input-fg 'black'
 set -g @claude-signal-done-bg 'red'
 set -g @claude-signal-done-fg 'black'
+```
+
+Optionally add a spinner to show while Claude Code is executing tools.
+
+```tmux
+set -g @claude-signal-running-frames "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏"
 ```
