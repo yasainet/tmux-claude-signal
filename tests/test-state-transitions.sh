@@ -20,19 +20,23 @@ echo "  case: needs-input paints yellow"
 state_sh "$pane_id" --state needs-input
 assert_eq "bg=yellow,fg=black" "$(get_style "$window_id")" "needs-input bg"
 assert_eq "bg=yellow,fg=black" "$(get_current_style "$window_id")" "needs-input current"
+assert_eq "needs-input" "$(get_state_marker "$window_id")" "needs-input marker"
 
 echo "  case: off clears needs-input"
 state_sh "$pane_id" --state off
 assert_empty "$(get_style "$window_id")" "off clears style"
 assert_empty "$(get_current_style "$window_id")" "off clears current"
+assert_empty "$(get_state_marker "$window_id")" "off clears marker"
 
 echo "  case: done paints red"
 state_sh "$pane_id" --state done
 assert_eq "bg=red,fg=black" "$(get_style "$window_id")" "done bg"
+assert_eq "done" "$(get_state_marker "$window_id")" "done marker"
 
 echo "  case: off clears done"
 state_sh "$pane_id" --state off
 assert_empty "$(get_style "$window_id")" "off clears style"
+assert_empty "$(get_state_marker "$window_id")" "off clears marker"
 
 echo "  case: colors are overridable"
 _tmux set-option -g "@claude-signal-needs-input-bg" "cyan"

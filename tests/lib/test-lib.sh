@@ -44,6 +44,11 @@ get_current_style() {
   _tmux show-options -wqv -t "$window_id" window-status-current-style 2>/dev/null || true
 }
 
+get_state_marker() {
+  local window_id="$1"
+  _tmux show-options -wqv -t "$window_id" @claude-signal-state 2>/dev/null || true
+}
+
 assert_eq() {
   local expected="$1" actual="$2" msg="${3:-}"
   if [ "$expected" != "$actual" ]; then

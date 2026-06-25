@@ -53,6 +53,7 @@ apply_style() {
   sig_log "APPLY window=$window_id bg=$bg fg=$fg"
   tmux set-window-option -qt "$window_id" "window-status-style" "bg=$bg,fg=$fg"
   tmux set-window-option -qt "$window_id" "window-status-current-style" "bg=$bg,fg=$fg"
+  tmux set-window-option -qt "$window_id" "@claude-signal-state" "$state"
 }
 
 clear_style() {
@@ -60,6 +61,7 @@ clear_style() {
   sig_log "CLEAR window=$window_id"
   tmux set-window-option -qut "$window_id" "window-status-style" || true
   tmux set-window-option -qut "$window_id" "window-status-current-style" || true
+  tmux set-window-option -qut "$window_id" "@claude-signal-state" || true
 }
 
 window_id=$(tmux display-message -p -t "$pane" '#{window_id}')
