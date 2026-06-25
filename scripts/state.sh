@@ -3,6 +3,13 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=log.sh
+. "$SCRIPT_DIR/log.sh"
+
+sig_log "state.sh enter args=$*"
+trap 'sig_log "state.sh exit code=$?"' EXIT
+
 UNSET_SENTINEL="__UNSET__"
 
 usage() {
@@ -52,23 +59,33 @@ env_unset() { tmux set-environment -gu "$1" 2>/dev/null || true; }
 
 save_orig_once() {
   local window_id="$1" opt="$2" env_key="$3" v
-  [ -n "$(env_get "$env_key")" ] && return
+  if [ -n "$(env_get "$env_key")" ]; then
+    sig_log "save_orig_once SKIP window=$window_id opt=$opt key=$env_key (already set)"
+    return
+  fi
   v=$(tmux show-options -wqv -t "$window_id" "$opt" 2>/dev/null || true)
   if [ -z "$v" ]; then
     env_set "$env_key" "$UNSET_SENTINEL"
+    sig_log "save_orig_once SET   window=$window_id opt=$opt key=$env_key value=<UNSET>"
   else
     env_set "$env_key" "$v"
+    sig_log "save_orig_once SET   window=$window_id opt=$opt key=$env_key value=$v"
   fi
 }
 
 restore_orig() {
   local window_id="$1" opt="$2" env_key="$3" v
   v=$(env_get "$env_key")
-  [ -z "$v" ] && return
+  if [ -z "$v" ]; then
+    sig_log "restore_orig SKIP  window=$window_id opt=$opt key=$env_key (env empty)"
+    return
+  fi
   if [ "$v" = "$UNSET_SENTINEL" ]; then
     tmux set-window-option -qut "$window_id" "$opt" || true
+    sig_log "restore_orig UNSET window=$window_id opt=$opt key=$env_key"
   else
     tmux set-window-option -qt "$window_id" "$opt" "$v"
+    sig_log "restore_orig WRITE window=$window_id opt=$opt key=$env_key value=$v"
   fi
   env_unset "$env_key"
 }
@@ -77,6 +94,7 @@ apply_style() {
   local window_id="$1" bg="$2" fg="$3"
   local skey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_STYLE"
   local ckey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_CURRENT"
+  sig_log "APPLY window=$window_id bg=$bg fg=$fg"
   save_orig_once "$window_id" "window-status-style" "$skey"
   save_orig_once "$window_id" "window-status-current-style" "$ckey"
   tmux set-window-option -qt "$window_id" "window-status-style" "bg=$bg,fg=$fg"
@@ -87,11 +105,10 @@ clear_style() {
   local window_id="$1"
   local skey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_STYLE"
   local ckey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_CURRENT"
+  sig_log "CLEAR window=$window_id"
   restore_orig "$window_id" "window-status-style" "$skey"
   restore_orig "$window_id" "window-status-current-style" "$ckey"
 }
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 wrap_format() {
   local window_id="$1"
@@ -124,6 +141,7 @@ restore_format() {
 
 window_id=$(tmux display-message -p -t "$pane" '#{window_id}')
 state_key="TMUX_CLAUDE_SIGNAL_${window_id}_STATE"
+sig_log "state.sh resolve state=$state pane=$pane window=$window_id"
 
 running_frames=$(opt_or_default "@claude-signal-running-frames" "")
 needs_bg=$(opt_or_default "@claude-signal-needs-input-bg" "yellow")
