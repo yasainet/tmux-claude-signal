@@ -33,3 +33,21 @@
 - 新挙動: `apply_style` = window option set / `clear_style` = window option unset / focus-ack の restore = window option unset。
 - theme は global level (`set -g window-status-style ...`) で設定する前提。window option を unset すれば global default に戻る。window option レベルの theme はサポート外。
 - 副次: hook の並列実行に対しても idempotent (最後の apply が勝つ、race で stale が残らない)。
+
+## 2026-06-26 scope を cross-session state marker 公開に拡張
+
+- scope を「同 session 内の着色対象 + 全 session の state marker 公開」に拡張する。
+- 理由: 複数 session 環境での claude 状態把握 UX の改善。着色対象は同 session 内 window で不変。state marker の公開は純粋に API surface 追加で scope boundary は汚さない。
+- `@claude-signal-state` window option として state を公開し、集約スクリプト `cross-session.sh` が全 session window を参照可能にする。
+
+## 2026-06-26 state marker を `@claude-signal-state` window option で公開
+
+- state marker を window option `@claude-signal-state` として公開し、値は needs-input / done / (unset) とする。
+- 理由: read-only なメタデータを global window option 層で提供し、集約スクリプトおよび将来の外部監視ツールが参照可能にする。
+- state.sh の apply_style / clear_style と focus-ack.sh でこの option を set / unset する。
+
+## 2026-06-26 cross-session indicator の記号は `●` 単一
+
+- cross-session indicator の記号は `●` (Unicode U+25CF) 単一とし、色 (黄 = needs-input、赤 = done) で状態を区別し、件数は出さない。
+- 理由: Nerd Font 非依存で SSH 先 fallback を担保し、複数 state の同一性で視認性と情報量のバランスを取る。
+- needs-input = fg=yellow、done = fg=red のシンプルな色 map で、複数状態が並ぶ場合は needs-input (黄) → done (赤) の順。
