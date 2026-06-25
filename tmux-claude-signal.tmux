@@ -17,3 +17,5 @@ for hook in pane-focus-in after-select-window after-select-pane; do
   done <<< "$existing"
   tmux set-hook -ag "$hook" "$focus_cmd"
 done
+
+tmux run-shell "$CURRENT_DIR/scripts/cleanup.sh" 2>/dev/null || true
