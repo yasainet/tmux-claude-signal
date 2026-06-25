@@ -22,6 +22,6 @@ while IFS='|' read -r sess marker; do
 done < <(tmux list-windows -a -F '#{session_name}|#{@claude-signal-state}' 2>/dev/null)
 
 out=""
-[ "$has_needs" -eq 1 ] && out+="#[fg=yellow]●#[default] "
-[ "$has_done" -eq 1 ]  && out+="#[fg=red]●#[default] "
+[ "$has_needs" -eq 1 ] && out+=" #[fg=yellow]●#[default]"
+[ "$has_done" -eq 1 ]  && out+=" #[fg=red]●#[default]"
 printf '%s' "$out"
