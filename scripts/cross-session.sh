@@ -24,4 +24,5 @@ done < <(tmux list-windows -a -F '#{session_name}|#{@claude-signal-state}' 2>/de
 out=""
 [ "$has_needs" -eq 1 ] && out+=" #[fg=yellow]●#[default]"
 [ "$has_done" -eq 1 ]  && out+=" #[fg=red]●#[default]"
+[ -n "$out" ] && out+=" "
 printf '%s' "$out"
