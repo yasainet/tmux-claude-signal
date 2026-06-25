@@ -22,7 +22,7 @@ echo "  case: no markers anywhere -> empty"
 assert_empty "$(cross_session_sh test)" "all clean"
 
 icon=$''
-chip="#[fg=#15161e,bg=#9ece6a] ${icon} "
+chip="#[fg=#15161e,bg=#9ece6a] ${icon}  "
 
 echo "  case: needs-input in other session -> chip emitted"
 _tmux set-window-option -qt "$other_window" "@claude-signal-state" "needs-input"
