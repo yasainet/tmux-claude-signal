@@ -32,16 +32,21 @@ Resuming work (UserPromptSubmit / PreToolUse) also clears stale signals.
 
 ### Cross-session indicator
 
-Aggregate other sessions' state into the attached client's `status-right`.
-Add the line below to your `tmux.conf` after the theme source.
+`scripts/cross-session.sh '#{client_session}'` emits a tmux format chip
+that reflects whether any other session has a non-idle window.
+Embed it in your theme's `status-right` wherever you want the chip:
 
 ```tmux
-set -ag status-right "#(#{TMUX_CLAUDE_SIGNAL_DIR}/scripts/cross-session.sh '#{client_session}')"
+set -g status-right "#(#{TMUX_CLAUDE_SIGNAL_DIR}/scripts/cross-session.sh '#{client_session}')..."
 ```
 
-A yellow `●` appears when any window in another session is `needs-input`.
-A red `●` appears for `done`.
-Both dots disappear when the corresponding state is cleared (focus or off).
+The chip is always rendered; only its color changes.
+
+- idle (no other session non-idle): muted blue background
+- active (any other session non-idle): green background
+
+Kind (needs-input vs done) is not distinguished.
+The chip signals only that something elsewhere needs attention.
 
 Override colors with these options.
 
