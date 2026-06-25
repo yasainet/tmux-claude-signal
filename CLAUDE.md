@@ -29,6 +29,9 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - spinner.sh は tmux `#()` から 1 秒粒度で呼ぶ stateless スクリプト。
   - frames は `@claude-signal-running-frames` にスペース区切りで設定。
 - env は plugin source 時に cleanup される (`scripts/cleanup.sh`)。
+- debug log は `@claude-signal-debug 1` で opt-in、デフォルト無音。
+  出力先は `${TMUX_CLAUDE_SIGNAL_LOG:-/tmp/claude-signal.log}`。
+  `scripts/log.sh` の `sig_log` / `sig_log_enabled` を `state.sh` と `focus-ack.sh` が source する。
 
 ## Commands
 

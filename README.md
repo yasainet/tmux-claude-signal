@@ -49,3 +49,21 @@ set -g @claude-signal-running-frames "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏"
 frames は空白区切りで設定する。
 未設定なら running hook が来ても何も表示されない (opt-in)。
 spinner は `#I` と `#W` の間に注入され focus しても消えない。
+
+### Debug log
+
+挙動を追跡したい場合は opt-in でログを記録できる。
+
+```tmux
+set -g @claude-signal-debug 1
+```
+
+デフォルトの出力先は `/tmp/claude-signal.log`。
+別パスにしたい場合は `TMUX_CLAUDE_SIGNAL_LOG` を tmux env に設定する。
+
+```sh
+tmux set-environment -g TMUX_CLAUDE_SIGNAL_LOG "$HOME/.cache/claude-signal.log"
+```
+
+`state.sh` と `focus-ack.sh` の入口、APPLY / CLEAR / RESTORE / ACTIVE 判定が記録される。
+未設定 (デフォルト) なら一切書き込まない。
