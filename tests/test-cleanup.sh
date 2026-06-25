@@ -9,32 +9,40 @@ trap 'teardown_tmux; rm -rf "${FAKE_DIR:-}"' EXIT
 
 live_window=$(_tmux display-message -p '#{window_id}')
 
+# STATE keys: stale (gone window) vs live
 _tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_@999_STATE' running
-_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_@999_ORIG_FORMAT' '#I:#W'
 _tmux set-environment -g "TMUX_CLAUDE_SIGNAL_${live_window}_STATE" running
-_tmux set-environment -g "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_FORMAT" '#I:#W'
 
-_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_%11_STATE' done
-_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_%11_PENDING' 1
+# Legacy ORIG_* keys: removed unconditionally (env-less restore 採用後)
 _tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_@999_ORIG_STYLE' __UNSET__
 _tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_@999_ORIG_CURRENT' __UNSET__
+_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_@999_ORIG_FORMAT' '#I:#W'
 _tmux set-environment -g "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_STYLE" __UNSET__
+_tmux set-environment -g "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_FORMAT" '#I:#W'
+
+# Old % schema
+_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_%11_STATE' done
+_tmux set-environment -g 'TMUX_CLAUDE_SIGNAL_%11_PENDING' 1
+
+# Preserved keys
 _tmux set-environment -g TMUX_CLAUDE_SIGNAL_DIR /test/path
+_tmux set-environment -g TMUX_CLAUDE_SIGNAL_LOG /tmp/some.log
 _tmux set-environment -g TMUX_CLAUDE_SIGNAL_FUTURE_FOO bar
 
-echo "  case: cleanup removes stale, keeps live + DIR + unknown"
+echo "  case: cleanup removes stale + all ORIG_*, keeps live STATE + DIR + LOG + unknown"
 cleanup_sh
 
 assert_env_absent 'TMUX_CLAUDE_SIGNAL_%11_STATE'    "old % STATE removed"
 assert_env_absent 'TMUX_CLAUDE_SIGNAL_%11_PENDING'  "old % PENDING removed"
-assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_ORIG_STYLE'   "gone window STYLE removed"
-assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_ORIG_CURRENT' "gone window CURRENT removed"
-assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_STATE'        "gone window STATE removed"
+assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_ORIG_STYLE'   "gone window ORIG_STYLE removed"
+assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_ORIG_CURRENT' "gone window ORIG_CURRENT removed"
 assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_ORIG_FORMAT'  "gone window ORIG_FORMAT removed"
-assert_eq "__UNSET__" "$(env_show "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_STYLE")" "live window kept"
+assert_env_absent 'TMUX_CLAUDE_SIGNAL_@999_STATE'        "gone window STATE removed"
+assert_env_absent "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_STYLE"  "live window ORIG_STYLE removed (env-less)"
+assert_env_absent "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_FORMAT" "live window ORIG_FORMAT removed (env-less)"
 assert_eq "running"  "$(env_show "TMUX_CLAUDE_SIGNAL_${live_window}_STATE")"       "live window STATE kept"
-assert_eq "#I:#W"    "$(env_show "TMUX_CLAUDE_SIGNAL_${live_window}_ORIG_FORMAT")" "live window ORIG_FORMAT kept"
 assert_eq "/test/path" "$(env_show TMUX_CLAUDE_SIGNAL_DIR)" "DIR kept"
+assert_eq "/tmp/some.log" "$(env_show TMUX_CLAUDE_SIGNAL_LOG)" "LOG kept"
 assert_eq "bar"        "$(env_show TMUX_CLAUDE_SIGNAL_FUTURE_FOO)" "unknown kept"
 
 echo "  case: list-windows empty makes cleanup a no-op"

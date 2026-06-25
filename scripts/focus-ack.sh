@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
-# Restore the original window-status style when the target pane gains focus.
+# Clear the signal color when the target pane gains focus.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=log.sh
 . "$SCRIPT_DIR/log.sh"
-
-UNSET_SENTINEL="__UNSET__"
 
 pane_id="${1:-}"
 window_id="${2:-}"
@@ -33,25 +31,6 @@ env_get() {
   tmux show-environment -g "$1" 2>/dev/null | sed 's/^[^=]*=//' || true
 }
 
-env_unset() { tmux set-environment -gu "$1" 2>/dev/null || true; }
-
-restore_orig() {
-  local opt="$1" env_key="$2" v
-  v=$(env_get "$env_key")
-  if [ -z "$v" ]; then
-    sig_log "focus-ack RESTORE_SKIP opt=$opt key=$env_key (env empty)"
-    return
-  fi
-  if [ "$v" = "$UNSET_SENTINEL" ]; then
-    tmux set-window-option -qut "$window_id" "$opt" || true
-    sig_log "focus-ack RESTORE_UNSET opt=$opt key=$env_key"
-  else
-    tmux set-window-option -qt "$window_id" "$opt" "$v"
-    sig_log "focus-ack RESTORE_WRITE opt=$opt key=$env_key value=$v"
-  fi
-  env_unset "$env_key"
-}
-
 state_key="TMUX_CLAUDE_SIGNAL_${window_id}_STATE"
 state=$(env_get "$state_key")
 if [ "$state" = "running" ]; then
@@ -59,10 +38,8 @@ if [ "$state" = "running" ]; then
   exit 0
 fi
 
-skey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_STYLE"
-ckey="TMUX_CLAUDE_SIGNAL_${window_id}_ORIG_CURRENT"
-
-restore_orig "window-status-style" "$skey"
-restore_orig "window-status-current-style" "$ckey"
+sig_log "focus-ack CLEAR window=$window_id"
+tmux set-window-option -qut "$window_id" "window-status-style" || true
+tmux set-window-option -qut "$window_id" "window-status-current-style" || true
 
 tmux refresh-client -S >/dev/null 2>&1 || true

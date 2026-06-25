@@ -20,7 +20,7 @@ Each Claude Code pane reports state via window-status.
 
 | state       | Claude Code hook  | default visual | cleared by          |
 | ----------- | ----------------- | -------------- | ------------------- |
-| running     | PreToolUse        | スピナー (opt-in) | 次の状態          |
+| running     | PreToolUse        | 💚 green       | 次の状態            |
 | needs-input | PermissionRequest | 💛 yellow      | focus or next state |
 | done        | Stop              | ❤️ red         | focus or next state |
 
@@ -28,27 +28,20 @@ Each Claude Code pane reports state via window-status.
 
 ![window-status example](docs/images/window-status.png)
 
-Attention signals clear as soon as you focus the window.
-Resuming work (UserPromptSubmit / PreToolUse) also clears any stale signal.
+needs-input / done は focus でクリアされる。
+running は focus しても色が残り、次の状態に遷移するまで保持される。
+Resuming work (UserPromptSubmit / PreToolUse) も stale signal をクリアする。
 
 Override colors with these options.
 
 ```tmux
+set -g @claude-signal-running-bg '#9ece6a'
+set -g @claude-signal-running-fg '#15161e'
 set -g @claude-signal-needs-input-bg 'yellow'
 set -g @claude-signal-needs-input-fg 'black'
 set -g @claude-signal-done-bg 'red'
 set -g @claude-signal-done-fg 'black'
 ```
-
-Optionally add a spinner to show while Claude Code is executing tools.
-
-```tmux
-set -g @claude-signal-running-frames "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏"
-```
-
-frames は空白区切りで設定する。
-未設定なら running hook が来ても何も表示されない (opt-in)。
-spinner は `#I` と `#W` の間に注入され focus しても消えない。
 
 ### Debug log
 

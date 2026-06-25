@@ -21,14 +21,15 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - UserPromptSubmit also maps to off so a new prompt clears any stale signal.
 - `pane-focus-in` does not fire reliably for panes running Claude Code TUI.
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
-- Theme-provided `window-status-style` must survive plugin state.
-  - Original value is saved under `__UNSET__` sentinel before overwrite and restored on clear.
-- needs-input / done は bg 軸 (window-status-style) で表現し focus でクリア。
-  - running は format 軸 (window-status-format) で別管理し focus 永続。
-  - focus-ack は STATE=running なら restore を skip。
-  - spinner.sh は tmux `#()` から 1 秒粒度で呼ぶ stateless スクリプト。
-  - frames は `@claude-signal-running-frames` にスペース区切りで設定。
-- env は plugin source 時に cleanup される (`scripts/cleanup.sh`)。
+- Theme は global level (`set -g window-status-style ...`) で設定する前提。
+  - 上書きは window option レベルのみ。off / focus で window option を unset すれば global default に戻る。
+  - window option レベルの theme はサポート外 (env-less restore 採用、`docs/DECISIONS.md` の 2026-06-25 env-less)。
+- running / needs-input / done すべて bg 軸 (window-status-style) で表現する。
+  - running は default `#9ece6a` (tokyonight green) で focus 永続 (`STATE=running` セット)。
+  - needs-input / done は focus でクリアされる (unread mark)。
+  - focus-ack は STATE=running なら window option unset を skip。
+  - 旧 spinner.sh / `#()` 軸は tmux 3.6 で format job 評価が不安定だったため廃止 (`docs/DECISIONS.md` の 2026-06-25 spinner 廃止)。
+- env は `STATE` のみ。plugin source 時に古い `ORIG_*` 残骸も含めて cleanup される (`scripts/cleanup.sh`)。
 - debug log は `@claude-signal-debug 1` で opt-in、デフォルト無音。
   出力先は `${TMUX_CLAUDE_SIGNAL_LOG:-/tmp/claude-signal.log}`。
   `scripts/log.sh` の `sig_log` / `sig_log_enabled` を `state.sh` と `focus-ack.sh` が source する。
@@ -45,8 +46,7 @@ Window-status color signal for Claude Code panes inside the current tmux session
 
 ## Glossaries
 
-- running: Claude Code が tool を実行中 (PreToolUse 発火後)。
-  `@claude-signal-running-frames` 設定時のみスピナーを表示。focus 永続。
+- running: Claude Code が tool を実行中 (PreToolUse 発火後)。bg 色 (default green) で focus 永続。
 - needs-input: Claude Code is blocked on a permission prompt waiting for the user. Color clears on focus.
 - done: Claude Code's Stop hook fired (turn finished). Color persists until window focus to act as unread mark.
 - off: clear any signal and restore the original window-status style. Used on resume (UserPromptSubmit / PreToolUse).
