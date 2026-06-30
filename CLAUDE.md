@@ -23,8 +23,15 @@ Window-status color signal for Claude Code panes inside the current tmux session
   - PreToolUse (matcher empty = all tools) fires after permission resolution, just before the tool runs.
   - Mapping PreToolUse to off clears stale needs-input as soon as Claude resumes work.
   - UserPromptSubmit も同様に off にマッピングし、新規プロンプトで stale を消す。
+- SessionEnd hook で Claude 終了時に off を呼び、stale marker を残さない。
+  - 異常終了 (SIGKILL 等) では発火しない可能性があるため、cross-session.sh 側で `@claude-signal-pane` の生存チェックを併用する。
 - `pane-focus-in` does not fire reliably for panes running Claude Code TUI.
   - Focus handler is registered on three hooks (pane-focus-in, after-select-window, after-select-pane) and self-checks active pane to drop stale invocations.
+- いま見ている pane への着色は state.sh 側で抑制する。
+  - 見ている window で done/needs-input になっても focus は変化せず focus-ack が発火しない。
+  - 抑制しないと離脱→復帰しないと既読にできない (after-select-window を人工的に起こす必要がある)。
+  - 抑制条件は session_attached + window_active + pane_active で、focus-ack の clear 条件と対称。
+  - detached session は「見ていない」ので着色し marker も残す。cross-session chip 点灯を維持するため。
 - Theme は global level (`set -g window-status-style ...`) で設定する前提。
   - 上書きは window option レベルのみ。off / focus で window option を unset すれば global default に戻る。
   - window option レベルの theme はサポート外 (env-less restore 採用)。
@@ -49,3 +56,4 @@ Window-status color signal for Claude Code panes inside the current tmux session
 - done: Claude Code's Stop hook fired (turn finished). Color persists until window focus to act as unread mark.
 - off: clear any signal and restore the original window-status style. Used on resume (UserPromptSubmit / PreToolUse).
 - `@claude-signal-state`: window option として公開される state marker。値は `needs-input` / `done` / (unset)。`state.sh` の apply/clear と `focus-ack.sh` で同期され、`scripts/cross-session.sh` が全 window を集約して読む。
+- `@claude-signal-pane`: marker を打った時点の Claude pane id。`cross-session.sh` で `tmux display-message -t <pane_id>` が空文字を返す (pane 消滅) なら stale として skip する。`@claude-signal-state` と必ずペアで apply/clear される。

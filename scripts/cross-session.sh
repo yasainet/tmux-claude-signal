@@ -15,15 +15,18 @@ fi
 current="${1:-}"
 
 has_any=0
-while IFS='|' read -r sess marker; do
+while IFS='|' read -r sess marker pane_id; do
   [ "$sess" = "$current" ] && continue
   case "$marker" in
-    needs-input|done)
-      has_any=1
-      break
-      ;;
+    needs-input|done) ;;
+    *) continue ;;
   esac
-done < <(tmux list-windows -a -F '#{session_name}|#{@claude-signal-state}' 2>/dev/null)
+  [ -z "$pane_id" ] && continue
+  resolved=$(tmux display-message -p -t "$pane_id" '#{pane_id}' 2>/dev/null || true)
+  [ -z "$resolved" ] && continue
+  has_any=1
+  break
+done < <(tmux list-windows -a -F '#{session_name}|#{@claude-signal-state}|#{@claude-signal-pane}' 2>/dev/null)
 
 icon=$'⊞'
 if [ "$has_any" -eq 1 ]; then
